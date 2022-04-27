@@ -16,7 +16,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
  # check the actions/cache for different languages
-          restore-key: |
+          restore-keys: |
             ${{ runner.os }}-node-
 # if github don't find a cache with the key, it will go to find any old cache with  ${{ runner.os }}-node- structure and then it will use it and cached it one more time. 
       - name: Use NodeJs

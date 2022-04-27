@@ -54,7 +54,7 @@ jobs:
 #  creating a release
 ########################################################################
       - name: Semantic Release
-        if: github.event_name == 'pull_request' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -66,7 +66,7 @@ jobs:
 
 #Deploy project Folder
       - name: Deploy to Staging
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: npx surge --project ./build --domain $STAGING_SURGE_DOMAIN
         env:
           SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}

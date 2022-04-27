@@ -10,6 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with: 
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+ # check the actions/cache for different languages
+          restore-keys: |
+            ${{ runner.os }}-node-
+# if github don't find a cache with the key, it will go to find any old cache with  ${{ runner.os }}-node- structure and then it will use it and cached it one more time. 
       - name: Use NodeJs
         uses: actions/setup-node@v1
         with:
@@ -25,7 +34,7 @@ jobs:
      
       - name: Deploy to Staging
         if: github.event_name == 'push'
-        run: npx surge --project ./build --domain various-sponge2.surge.sh
+        run: npx surge --project ./build --domain ۶
         env:
           SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
           SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}

@@ -1,0 +1,85 @@
+name: CI
+on:
+  pull_request:
+    branches: [develop,master]
+  push:
+    branches: [develop,master]
+env:
+  STAGING_SURGE_DOMAIN: various-sponge2.surge.sh
+  PROD_SURGE_DOMAIN: dispensable-place2.surge.sh
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+# cache node_modules      
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with: 
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      # check the actions/cache for different languages
+          restore-keys: |
+            ${{ runner.os }}-node-
+      # if github don't find a cache with the key, it will go to find any old cache with  ${{ runner.os }}-node- structure and then it will use it and cached it one more time. 
+
+#use Nodejs and run it     
+      - name: Use NodeJs
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - run: npm ci
+      - run: npm run format
+      - run: npm test -- --coverage
+        env:
+          CI: true
+#upload test coverage artifact           
+      - name: upload test artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: code coverage
+          path: coverage  
+#Build project             
+      - name: Build project
+        if: github.event_name == 'push'
+        run: npm run build
+#upload project Folder
+      - name: upload build Folder
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v1
+        with:
+          name: build Folder
+          path: build  
+########################################################################
+#  creating a release
+########################################################################
+      - name: Semantic Release
+        if: github.event_name == 'pull_request' && github.ref == 'refs/heads/master'
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+         
+
+########################################################################
+#  Deploy to Staging
+########################################################################
+
+#Deploy project Folder
+      - name: Deploy to Staging
+        if: github.event_name == 'push'
+        run: npx surge --project ./build --domain $STAGING_SURGE_DOMAIN
+        env:
+          SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
+          SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}
+
+########################################################################
+#  Deploy to production
+########################################################################
+
+#Deploy project Folder
+      - name: Deploy to production
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: npx surge --project ./build --domain $PROD_SURGE_DOMAIN
+        env:
+          SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
+          SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}

@@ -1,10 +1,12 @@
 name: CI
 on:
   pull_request:
-    branches: [develop]
+    branches: [develop,master]
   push:
-    branches: [develop]
-
+    branches: [develop,master]
+env:
+  STAGING_SURGE_DOMAIN: various-sponge2.surge.sh
+  PROD_SURGE_DOMAIN: dispensable-place2.surge.sh
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,11 +49,37 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: build Folder
-          path: build   
+          path: build  
+########################################################################
+#  creating a release
+########################################################################
+      - name: Deploy to Staging
+        if: github.event_name == 'push' && github.event.ref == "refs/heads/master"
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+         
+
+########################################################################
+#  Deploy to Staging
+########################################################################
+
 #Deploy project Folder
       - name: Deploy to Staging
         if: github.event_name == 'push'
-        run: npx surge --project ./build --domain ۶
+        run: npx surge --project ./build --domain $STAGING_SURGE_DOMAIN
+        env:
+          SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
+          SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}
+
+########################################################################
+#  Deploy to production
+########################################################################
+
+#Deploy project Folder
+      - name: Deploy to production
+        if: github.event_name == 'push' && github.event.ref == "refs/heads/master"
+        run: npx surge --project ./build --domain $PROD_SURGE_DOMAIN
         env:
           SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
           SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}

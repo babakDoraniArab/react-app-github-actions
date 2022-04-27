@@ -10,15 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+# cache node_modules      
       - name: Cache node_modules
         uses: actions/cache@v1
         with: 
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
- # check the actions/cache for different languages
+      # check the actions/cache for different languages
           restore-keys: |
             ${{ runner.os }}-node-
-# if github don't find a cache with the key, it will go to find any old cache with  ${{ runner.os }}-node- structure and then it will use it and cached it one more time. 
+      # if github don't find a cache with the key, it will go to find any old cache with  ${{ runner.os }}-node- structure and then it will use it and cached it one more time. 
+
+#use Nodejs and run it     
       - name: Use NodeJs
         uses: actions/setup-node@v1
         with:
@@ -28,21 +31,24 @@ jobs:
       - run: npm test -- --coverage
         env:
           CI: true
+#upload test coverage artifact           
       - name: upload test artifact
         uses: actions/upload-artifact@v1
         with:
           name: code coverage
-          path: coverage    
+          path: coverage  
+#Build project             
       - name: Build project
         if: github.event_name == 'push'
         run: npm run build
+#upload project Folder
       - name: upload build Folder
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v1
         with:
           name: build Folder
           path: build   
-
+#Deploy project Folder
       - name: Deploy to Staging
         if: github.event_name == 'push'
         run: npx surge --project ./build --domain ۶

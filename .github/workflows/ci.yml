@@ -27,7 +27,7 @@ jobs:
       - name: Use NodeJs
         uses: actions/setup-node@v1
         with:
-          node-version: "12.x"
+          node-version: " 16.x"
       - run: npm ci
       - run: npm run format
       - run: npm test -- --coverage

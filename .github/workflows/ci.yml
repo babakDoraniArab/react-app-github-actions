@@ -88,3 +88,10 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx surge --project ./build --domain $PROD_SURGE_DOMAIN
         
+########################################################################
+#  after deployment
+########################################################################
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+      

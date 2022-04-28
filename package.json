@@ -17,7 +17,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "format:check": "npx prettier --check \"**/*.{js,jsx,yml,yaml,json,css,scss,md}\"",
-    "format": "npx prettier --write \"**/*.{js,jsx,yml,yaml,json,css,scss,md}\"",
+    "format": "npx prettier --write \"**/*.{js,jsx,yml,yaml,json,css,scss,md}\""
   
   },
   "husky": {

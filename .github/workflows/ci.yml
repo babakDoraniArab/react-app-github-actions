@@ -1,9 +1,9 @@
 name: CI
 on:
   pull_request:
-    branches: [develop,master]
+    branches: [develop, master]
   push:
-    branches: [develop,master]
+    branches: [develop, master]
 env:
   STAGING_SURGE_DOMAIN: various-sponge2.surge.sh
   PROD_SURGE_DOMAIN: dispensable-place2.surge.sh
@@ -11,22 +11,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-          SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
-          SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}
+      SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
+      SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}
     steps:
       - uses: actions/checkout@v2
-# cache node_modules      
+      # cache node_modules
       - name: Cache node_modules
         uses: actions/cache@v1
-        with: 
+        with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      # check the actions/cache for different languages
+          # check the actions/cache for different languages
           restore-keys: |
             ${{ runner.os }}-node-
-      # if github don't find a cache with the key, it will go to find any old cache with  ${{ runner.os }}-node- structure and then it will use it and cached it one more time. 
-
-#use Nodejs and run it     
+      # if github don't find a cache with the key, it will go to find any old cache with  ${{ runner.os }}-node- structure and then it will use it and cached it one more time.
+      #use Nodejs and run it
       - name: Use NodeJs
         uses: actions/setup-node@v1
         with:
@@ -36,62 +35,76 @@ jobs:
       - run: npm test -- --coverage
         env:
           CI: true
-#upload test coverage artifact           
+      #upload test coverage artifact
       - name: upload test artifact
         uses: actions/upload-artifact@v1
         with:
           name: code coverage
-          path: coverage  
-#Build project             
+          path: coverage
+      #Build project
       - name: Build project
         if: github.event_name == 'push'
         run: npm run build
-#upload project Folder
+      #upload project Folder
       - name: upload build Folder
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v1
         with:
           name: build Folder
-          path: build  
-########################################################################
-#  Before go to production
-########################################################################
+          path: build
+      ########################################################################
+      #  Before go to production
+      ########################################################################
       - name: Zip assets
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           zip -r build.zip ./build  
           zip -r coverage.zip ./coverage
-          
+
       - name: Semantic Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{secrets.CUSTOM_TOKEN}}
-         
 
-########################################################################
-#  Deploy to Staging
-########################################################################
+      ########################################################################
+      #  Deploy to Staging
+      ########################################################################
 
-#Deploy project Folder
+      #Deploy project Folder
       - name: Deploy to Staging
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: npx surge --project ./build --domain $STAGING_SURGE_DOMAIN
-       
 
-########################################################################
-#  Deploy to production
-########################################################################
+      ########################################################################
+      #  Deploy to production
+      ########################################################################
 
-#Deploy project Folder
+      #Deploy project Folder
       - name: Deploy to production
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx surge --project ./build --domain $PROD_SURGE_DOMAIN
-        
-########################################################################
-#  after deployment
-########################################################################
+
+      ########################################################################
+      #  after deployment
+      ########################################################################
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-      
+
+      ########################################################################
+      #  Open issue
+      ########################################################################
+      - name: Open Issue
+        if: failure() && github.event_name == 'push'
+        run: |
+          curl --request POST \
+          --url https:api.github.com/repos/${{ github.repository }}/issues \
+          --header 'authorization: Bearer ${{ secrets.CUSTOM_TOKEN }}' \
+          --header 'content-type : application/json' \
+          --data '{
+          "title": "Automated issue for commit : ${{ github.sha }}",
+          "body" : "This issue is created automatically by github actions workflow **{{github.workflow}}**.\n\n 
+          the commit hash was: _${{github.sha}}_.",
+          "assignees":["${{github.event.pull_request.user.login}}"]
+          }'

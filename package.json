@@ -17,7 +17,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "format:check": "npx prettier --check \"**/*.{js,jsx,yml,yaml,json,css,scss,md}\"",
-    "format": "npx prettier --write \"**/*.{js,jsx,yml,yaml,json,css,scss,md}\""
+    "format": "npx prettier --write \"**/*.{js,jsx,yml,yaml,json,css,scss,md}\"",
+    "prepare": "husky install"
   },
   "husky": {
     "hooks": {
@@ -45,7 +46,7 @@
   "devDependencies": {
     "@commitlint/cli": "^16.2.4",
     "@commitlint/config-conventional": "^16.2.4",
-    "husky": "^7.0.4",
+    "husky": "^4.3.8",
     "prettier": "2.6.2",
     "semantic-release": "^19.0.2"
   }

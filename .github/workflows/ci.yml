@@ -103,7 +103,7 @@ jobs:
         if: failure() && github.event_name == 'push'
         run: |
           echo "################################################################"
-          echo ${{ github.event.commits.author.username }}
+          echo ${{ github.actor }}
           curl --request POST \
           --url https://api.github.com/repos/${{ github.repository }}/issues \
           --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
@@ -111,7 +111,7 @@ jobs:
           --data '{
             "title": "Automated issue for commit: ${{ github.sha }}",
             "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_." ,
-            "assignees":["${{ github.event.commits.author.username }}"]
+            "assignees":["${{ github.actor }}"]
             }' \
           --fail
 

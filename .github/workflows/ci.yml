@@ -98,71 +98,15 @@ jobs:
       - name: Open Issue
         if: failure() && github.event_name == 'push'
         run: |
-          curl -X "POST" "https://api.github.com/repos/${{ github.repository }}/issues?state=all" \
-          -H "Cookie: logged_in=no" \
-          -H "Authorization: token ${{ secrets.CUSTOM_TOKEN }}" \
-          -H "Content-Type: text/plain; charset=utf-8" \
-          -d $'{
-            "title": "Automated issue for commit : ${{ github.sha }}",
-                "body" : "This issue is created automatically by github actions workflow **{{github.workflow}}**.\n\n 
-                the commit hash was: _${{github.sha}}_.",
-                "assignees":["${{github.event.pull_request.user.login}}"], 
-                "labels": [
-                    "bug",
-                  ]
-           }'
+          curl --request POST \
+          --url https://api.github.com/repos/${{ github.repository }}/issues \
+          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "title": "Automated issue for commit: ${{ github.sha }}",
+            "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_."
+            }' \
+          --fail
 
 
-
-
-
-      #  curl -X "POST" "https://api.github.com/repos/${{ github.repository }}/issues?state=all" \
-      #     -H  'authorization: Bearer ${{ secrets.CUSTOM_TOKEN }}' \
-      #     -H "Content-Type: text/plain; charset=utf-8" \
-      #     -d '{
-            # "title": "Automated issue for commit : ${{ github.sha }}",
-            # "body" : "This issue is created automatically by github actions workflow **{{github.workflow}}**.\n\n 
-            # the commit hash was: _${{github.sha}}_.",
-            # "assignees":["${{github.event.pull_request.user.login}}"], 
-            # "labels": [
-            #     "bug",
-            #   ]
-      #       }'
-          
-
-
-
-      # curl --request POST \
-      # --url https://api.github.com/repos/${{ github.repository }}/issues \
-      # --header 'authorization: Bearer ${{ secrets.CUSTOM_TOKEN }}' \
-      # --header 'content-type : application/json' \
-      # --data '{
-      # "title": "Automated issue for commit : ${{ github.sha }}",
-      # "body" : "This issue is created automatically by github actions workflow **{{github.workflow}}**.\n\n 
-      # the commit hash was: _${{github.sha}}_.",
-      # "assignees":["${{github.event.pull_request.user.login}}"]
-      # }'
-
-
-
-
-          
-          
-          
-          
-          
-      #      $'{
-      #   "title": "A workflow alerts Operator who performs a process",
-      #   "body": "TBD",
-      #   "milestone": 5,
-      #   "assignees": [
-      #     "RickCogley",
-      #     "NathanielPhillips"
-      #   ],
-      #   "labels": [
-      #     "story",
-      #     "#2",
-      #     "enhancement",
-      #     "production"
-      #   ]
-      # }'
+        

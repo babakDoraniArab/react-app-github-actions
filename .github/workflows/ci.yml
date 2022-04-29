@@ -95,12 +95,12 @@ jobs:
       ########################################################################
       #  Open issue
       ########################################################################
-      - run: |
-          echo "################################################################"
-          echo "${{ github.event.pull_request.user.login }}"
+
       - name: Open Issue
         if: failure() && github.event_name == 'push'
         run: |
+          echo "################################################################"
+          echo "${{ github.event.pull_request.user.login }}"
           curl --request POST \
           --url https://api.github.com/repos/${{ github.repository }}/issues \
           --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \

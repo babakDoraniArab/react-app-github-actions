@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn 
+          Learn React
           babak test coverage 
           test production 
         </a>

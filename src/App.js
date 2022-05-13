@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-         test ba navid
+         test ba 2
         </a>
       </header>
     </div>
